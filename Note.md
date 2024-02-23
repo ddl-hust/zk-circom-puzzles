@@ -17,6 +17,29 @@ v <-- a + b; // using a signal assignment for a variable is not allowed
     这就是为啥在AND()里面不能直接使用&&
 
 
+
+>Linear expression: an expression where only addition is used. It can also be written using multiplication of variables by constants. For instance, the expression 2*x + 3*y + 2 is allowed, as it is equivalent to x + x + y + y + y + 2.
+Quadratic expression: it is obtained by allowing a multiplication between two linear expressions and addition of a linear expression: A*B - C, where A, B and C are linear expressions. For instance, (2*x + 3*y + 2) * (x+y) + 6*x + y – 2.
+Non quadratic expressions: any arithmetic expression which is not of the previous kind.
+circom allows programmers to define the constraints that define the arithmetic circuit. All constraints must be quadratic of the form A*B + C = 0, where A, B and C are linear combinations of signals. circom will apply some minor transformations on the defined constraints in order to meet the format A*B + C = 0:
+
+quote from:https://docs.circom.io/circom-language/constraint-generation/
+
+
+这段关于signal约束的话如何理解,一开始以为是只能有形如: A*B+C的二次约束
+但是在下面的非门电路中好像也只有线性约束
+```
+template NOT() {
+    signal input in;
+    signal output out;
+
+    out <== 1 + in - 2*in; //todo: why 
+}
+```
+
+
+# 常用电路
+
 ```js
 template IsEqual() {
     signal input in[2];
@@ -30,14 +53,12 @@ template IsEqual() {
 }
 ```
 
-
-下面这个例子显示了如何在信号上实现AND逻辑 
 ```js
 template And() {
     signal input in[2];
     signal output c;
     
-    // force inputs to be zero or one,eg if not meet, then Assert Failed.
+    // force inputs to be zero or one,eg if not meet, then Assert Failed. 官方的实现没有做(0,1)限制,可以理解为大于0就是真
     in[0] === in[0] * in[0];
     in[1] === in[1] * in[1];
     
@@ -52,7 +73,7 @@ template And() {
 
 ## Equality 
 
-这里实现了一个IsZero的判断,考虑下为什么不直接这么写,circom是[支持三目运算符](https://docs.circom.io/circom-language/basic-operators/#field-elements)
+这里实现了一个IsZero的判断,考虑下为什么不直接这么写
 ```
 template IsZero() {
   signal input in;
@@ -62,9 +83,7 @@ template IsZero() {
 }
 ```
 运行上述代码,会报错`error[T3001]: Non quadratic constraints are not allowed!`
-因为在做out约束的时候不是二次约束,这就是为啥需要先计算一个inv,然后用inv和input做一个二次约束
-
-这种电路的约束是circom电路系统本身的特性
+在做out 约束的时候不是一个有效的约束
 
 
 ## Poseidon
@@ -75,6 +94,9 @@ template IsZero() {
 注意circom import poseidon 路径 `include "../node_modules/circomlib/circuits/poseidon.circom";`
 
 
+## NotEqual
+
+一些电路的组合,Equal+NOT
 
 
 # 参考
