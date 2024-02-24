@@ -99,6 +99,11 @@ template IsZero() {
 一些电路的组合,Equal+NOT
 
 
+## ForLoop
+
+signal 是不可变量不能重复赋值,借助一个中间数组signal来实现
+
+
 # 参考
 
 https://www.rareskills.io/post/circom-tutorial
